@@ -25,16 +25,16 @@ This program uses computer vision (MediaPipe and OpenCV) to analyze a basketball
 ## Installation
 
 1. Install the required packages:
-   `ash
+   ```bash
    pip install -r requirements.txt
-   ` 
+   ``` 
 
 ## Usage
 
 1. Run the script:
-   `ash
+   ```bash
    python shooting_analysis.py
-   ` 
+   ``` 
 2. **GUI Setup**:
    - Enter the **Shooter's Height** (in cm).
    - Select **Video Source** (Webcam or Video File).
