@@ -1,0 +1,1012 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Basketball Shooting Analyzer</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            min-height: 100vh;
+            color: #fff;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        header {
+            text-align: center;
+            padding: 20px 0;
+            margin-bottom: 20px;
+        }
+        
+        header h1 {
+            font-size: 2.5rem;
+            color: #e67e22;
+            margin-bottom: 10px;
+        }
+        
+        header p {
+            color: #bdc3c7;
+            font-size: 1.1rem;
+        }
+        
+        .main-content {
+            display: grid;
+            grid-template-columns: 1fr 350px;
+            gap: 20px;
+        }
+        
+        .video-section {
+            background: #0f0f1a;
+            border-radius: 15px;
+            padding: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+        }
+        
+        .video-container {
+            position: relative;
+            width: 100%;
+            background: #000;
+            border-radius: 10px;
+            overflow: hidden;
+        }
+        
+        #videoFeed {
+            width: 100%;
+            display: block;
+            border-radius: 10px;
+        }
+        
+        .video-overlay {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            background: rgba(0,0,0,0.7);
+            padding: 10px 15px;
+            border-radius: 8px;
+            font-size: 0.9rem;
+        }
+        
+        .video-overlay.live {
+            background: rgba(231, 76, 60, 0.8);
+        }
+        
+        .controls {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+            flex-wrap: wrap;
+        }
+        
+        .btn {
+            padding: 12px 25px;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 600;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, #27ae60, #2ecc71);
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(39, 174, 96, 0.4);
+        }
+        
+        .btn-danger {
+            background: linear-gradient(135deg, #c0392b, #e74c3c);
+            color: white;
+        }
+        
+        .btn-danger:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(231, 76, 60, 0.4);
+        }
+        
+        .btn-secondary {
+            background: linear-gradient(135deg, #34495e, #2c3e50);
+            color: white;
+        }
+        
+        .btn-info {
+            background: linear-gradient(135deg, #2980b9, #3498db);
+            color: white;
+        }
+        
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none !important;
+        }
+        
+        .sidebar {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+        
+        .panel {
+            background: #0f0f1a;
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+        }
+        
+        .panel h3 {
+            color: #e67e22;
+            margin-bottom: 15px;
+            font-size: 1.2rem;
+            border-bottom: 2px solid #e67e22;
+            padding-bottom: 10px;
+        }
+        
+        .stat-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 0;
+            border-bottom: 1px solid #2c3e50;
+        }
+        
+        .stat-item:last-child {
+            border-bottom: none;
+        }
+        
+        .stat-label {
+            color: #bdc3c7;
+        }
+        
+        .stat-value {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #3498db;
+        }
+        
+        .stat-value.shots {
+            color: #27ae60;
+            font-size: 2rem;
+        }
+        
+        .stat-value.stage-set {
+            color: #f1c40f;
+        }
+        
+        .stat-value.stage-release {
+            color: #27ae60;
+        }
+        
+        .form-score {
+            text-align: center;
+            padding: 20px;
+            background: linear-gradient(135deg, #2c3e50, #34495e);
+            border-radius: 10px;
+            margin-top: 10px;
+        }
+        
+        .form-score .score {
+            font-size: 3rem;
+            font-weight: bold;
+        }
+        
+        .form-score .score.good { color: #27ae60; }
+        .form-score .score.medium { color: #f1c40f; }
+        .form-score .score.poor { color: #e74c3c; }
+        
+        .feedback-list {
+            margin-top: 10px;
+        }
+        
+        .feedback-item {
+            background: #2c3e50;
+            padding: 10px 15px;
+            border-radius: 8px;
+            margin-bottom: 8px;
+            border-left: 4px solid #f1c40f;
+        }
+        
+        .feedback-item.good {
+            border-left-color: #27ae60;
+        }
+        
+        .input-group {
+            margin-bottom: 15px;
+        }
+        
+        .input-group label {
+            display: block;
+            margin-bottom: 5px;
+            color: #bdc3c7;
+        }
+        
+        .input-group input {
+            width: 100%;
+            padding: 10px;
+            border: 2px solid #34495e;
+            border-radius: 8px;
+            background: #1a1a2e;
+            color: white;
+            font-size: 1rem;
+        }
+        
+        .input-group input:focus {
+            outline: none;
+            border-color: #e67e22;
+        }
+        
+        .setup-instructions {
+            background: #1a1a2e;
+            border-radius: 10px;
+            padding: 15px;
+            margin-top: 15px;
+        }
+        
+        .setup-instructions h4 {
+            color: #f1c40f;
+            margin-bottom: 10px;
+        }
+        
+        .setup-instructions ol {
+            padding-left: 20px;
+            color: #bdc3c7;
+        }
+        
+        .setup-instructions li {
+            margin-bottom: 8px;
+        }
+        
+        .shot-history {
+            max-height: 200px;
+            overflow-y: auto;
+        }
+        
+        .shot-row {
+            display: grid;
+            grid-template-columns: 40px 1fr 1fr;
+            gap: 10px;
+            padding: 8px;
+            background: #1a1a2e;
+            border-radius: 5px;
+            margin-bottom: 5px;
+            font-size: 0.9rem;
+        }
+        
+        .shot-row .shot-num {
+            background: #e67e22;
+            border-radius: 50%;
+            width: 25px;
+            height: 25px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+        }
+        
+        .annotation-mode {
+            background: linear-gradient(135deg, #9b59b6, #8e44ad);
+            color: white;
+            padding: 15px;
+            border-radius: 10px;
+            margin-top: 15px;
+            display: none;
+        }
+        
+        .annotation-mode.active {
+            display: block;
+        }
+        
+        .annotation-mode h4 {
+            margin-bottom: 10px;
+        }
+        
+        @media (max-width: 1200px) {
+            .main-content {
+                grid-template-columns: 1fr;
+            }
+            
+            .sidebar {
+                display: grid;
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .sidebar {
+                grid-template-columns: 1fr;
+            }
+            
+            header h1 {
+                font-size: 1.8rem;
+            }
+        }
+
+        /* Camera placement guide */
+        .camera-guide {
+            background: linear-gradient(135deg, #1abc9c, #16a085);
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+
+        .camera-guide h3 {
+            color: white;
+            margin-bottom: 15px;
+        }
+
+        .camera-guide ul {
+            color: white;
+            padding-left: 20px;
+        }
+
+        .camera-guide li {
+            margin-bottom: 8px;
+        }
+
+        .camera-diagram {
+            text-align: center;
+            margin-top: 15px;
+            padding: 15px;
+            background: rgba(255,255,255,0.1);
+            border-radius: 8px;
+        }
+
+        .camera-diagram pre {
+            font-family: monospace;
+            color: #fff;
+            font-size: 12px;
+            line-height: 1.4;
+        }
+
+        /* Video source styles */
+        .source-btn.active {
+            background: linear-gradient(135deg, #27ae60, #2ecc71) !important;
+        }
+
+        .file-upload {
+            margin-top: 10px;
+        }
+
+        .file-upload label {
+            margin-bottom: 0;
+        }
+
+        .file-upload label:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+        }
+
+        /* Video timeline slider styles */
+        .video-timeline {
+            margin-top: 15px;
+            padding: 15px;
+            background: #1a1a2e;
+            border-radius: 10px;
+            display: none;
+        }
+
+        .video-timeline.active {
+            display: block;
+        }
+
+        .timeline-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .timeline-header h4 {
+            color: #e67e22;
+            margin: 0;
+        }
+
+        .time-display {
+            font-family: monospace;
+            color: #bdc3c7;
+            font-size: 0.9rem;
+        }
+
+        .timeline-slider {
+            width: 100%;
+            height: 8px;
+            -webkit-appearance: none;
+            appearance: none;
+            background: #34495e;
+            border-radius: 4px;
+            outline: none;
+            cursor: pointer;
+        }
+
+        .timeline-slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 18px;
+            height: 18px;
+            background: #e67e22;
+            border-radius: 50%;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+
+        .timeline-slider::-webkit-slider-thumb:hover {
+            transform: scale(1.2);
+        }
+
+        .timeline-slider::-moz-range-thumb {
+            width: 18px;
+            height: 18px;
+            background: #e67e22;
+            border-radius: 50%;
+            cursor: pointer;
+            border: none;
+        }
+
+        .playback-controls {
+            display: flex;
+            gap: 10px;
+            margin-top: 10px;
+            justify-content: center;
+        }
+
+        .playback-btn {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            background: #34495e;
+            color: white;
+        }
+
+        .playback-btn:hover {
+            background: #2c3e50;
+        }
+
+        .playback-btn.active {
+            background: #e67e22;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🏀 Basketball Shooting Analyzer</h1>
+            <p>AI-Powered Real-Time Shooting Form Analysis</p>
+        </header>
+
+        <!-- Camera Placement Guide -->
+        <div class="camera-guide">
+            <h3>📷 Webcam Placement Guide</h3>
+            <ul>
+                <li><strong>Position:</strong> Place webcam to the <strong>SIDE</strong> of the player (perpendicular to shooting direction)</li>
+                <li><strong>Height:</strong> About waist height (1-1.2 meters from ground)</li>
+                <li><strong>Distance:</strong> 3-5 meters away from the player</li>
+                <li><strong>View:</strong> Must see full body (head to feet) AND the basketball hoop</li>
+                <li><strong>Lighting:</strong> Good lighting, avoid backlighting</li>
+            </ul>
+            <div class="camera-diagram">
+                <pre>
+     [HOOP]
+        |
+        |
+   [PLAYER] -----> Shooting Direction
+        |
+        |
+   [CAMERA]  (Side view - sees player's profile)
+                </pre>
+            </div>
+        </div>
+
+        <div class="main-content">
+            <div class="video-section">
+                <div class="video-container">
+                    <img id="videoFeed" src="" alt="Video Feed">
+                    <div class="video-overlay" id="statusOverlay">
+                        ⏸ Not Started
+                    </div>
+                </div>
+                
+                <div class="controls">
+                    <button class="btn btn-primary" id="startBtn" onclick="startAnalysis()">
+                        ▶ Start Analysis
+                    </button>
+                    <button class="btn btn-danger" id="stopBtn" onclick="stopAnalysis()" disabled>
+                        ⏹ Stop
+                    </button>
+                    <button class="btn btn-info" id="hoopBtn" onclick="setHoopMode()" disabled>
+                        🎯 Set Hoop
+                    </button>
+                    <button class="btn btn-info" id="floorBtn" onclick="setFloorMode()" disabled>
+                        📏 Set Floor
+                    </button>
+                    <button class="btn btn-secondary" onclick="resetAnalysis()">
+                        🔄 Reset
+                    </button>
+                    <button class="btn btn-secondary" onclick="downloadData()">
+                        📥 Download CSV
+                    </button>
+                </div>
+
+                <div class="annotation-mode" id="annotationMode">
+                    <h4 id="annotationTitle">Select Hoop Area</h4>
+                    <p id="annotationInstructions">Click and drag on the video to select the hoop area.</p>
+                </div>
+
+                <!-- Video Timeline for Video Files -->
+                <div class="video-timeline" id="videoTimeline">
+                    <div class="timeline-header">
+                        <h4>🎬 Video Timeline</h4>
+                        <span class="time-display">
+                            <span id="currentTime">0:00</span> / <span id="totalTime">0:00</span>
+                        </span>
+                    </div>
+                    <input type="range" class="timeline-slider" id="timelineSlider" min="0" max="100" value="0">
+                    <div class="playback-controls">
+                        <button class="playback-btn" id="skipBackBtn" onclick="skipFrames(-150)" title="Skip back 5 seconds">⏪ -5s</button>
+                        <button class="playback-btn" id="frameBackBtn" onclick="skipFrames(-1)" title="Previous frame">◀</button>
+                        <button class="playback-btn active" id="playPauseBtn" onclick="togglePlayPause()">⏸ Pause</button>
+                        <button class="playback-btn" id="frameForwardBtn" onclick="skipFrames(1)" title="Next frame">▶</button>
+                        <button class="playback-btn" id="skipForwardBtn" onclick="skipFrames(150)" title="Skip forward 5 seconds">+5s ⏩</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="sidebar">
+                <!-- Video Source Panel -->
+                <div class="panel">
+                    <h3>📹 Video Source</h3>
+                    <div class="source-buttons">
+                        <button class="btn btn-info source-btn active" id="webcamBtn" onclick="selectWebcam()" style="width: 100%; margin-bottom: 10px;">
+                            📷 Use Webcam
+                        </button>
+                        <div class="file-upload">
+                            <label for="videoFile" class="btn btn-secondary" style="width: 100%; display: block; text-align: center; cursor: pointer;">
+                                📁 Upload Video File
+                            </label>
+                            <input type="file" id="videoFile" accept="video/*" style="display: none;" onchange="uploadVideo(this)">
+                        </div>
+                        <div id="uploadStatus" style="margin-top: 10px; font-size: 0.9rem; color: #bdc3c7;"></div>
+                    </div>
+                </div>
+
+                <!-- Settings Panel -->
+                <div class="panel">
+                    <h3>⚙️ Settings</h3>
+                    <div class="input-group">
+                        <label for="shooterHeight">Shooter Height (cm) - Optional</label>
+                        <input type="number" id="shooterHeight" value="" placeholder="e.g. 180 (for jump height)" min="100" max="250">
+                        <small style="color: #7f8c8d; font-size: 0.8rem;">Only needed for accurate jump height measurement</small>
+                    </div>
+                </div>
+
+                <!-- Real-time Stats -->
+                <div class="panel">
+                    <h3>📊 Live Statistics</h3>
+                    <div class="stat-item">
+                        <span class="stat-label">Shots</span>
+                        <span class="stat-value shots" id="shotCount">0</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-label">Stage</span>
+                        <span class="stat-value" id="stage">Ready</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-label">Elbow Angle</span>
+                        <span class="stat-value" id="elbowAngle">0°</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-label">Knee Angle</span>
+                        <span class="stat-value" id="kneeAngle">0°</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-label">Jump Height</span>
+                        <span class="stat-value" id="jumpHeight">0 cm</span>
+                    </div>
+                    
+                    <div class="form-score">
+                        <div>Form Score</div>
+                        <div class="score" id="formScore">0</div>
+                    </div>
+                </div>
+
+                <!-- Feedback Panel -->
+                <div class="panel">
+                    <h3>💡 Real-time Feedback</h3>
+                    <div class="feedback-list" id="feedbackList">
+                        <div class="feedback-item">Start analysis to see feedback</div>
+                    </div>
+                </div>
+
+                <!-- Shot History -->
+                <div class="panel">
+                    <h3>📝 Shot History</h3>
+                    <div class="shot-history" id="shotHistory">
+                        <p style="color: #bdc3c7; text-align: center;">No shots recorded yet</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let isRunning = false;
+        let annotationMode = null;
+        let startX, startY;
+        let videoSource = 'webcam';
+        let isPaused = false;
+        let videoInfo = { total_frames: 0, fps: 30, duration: 0, current_frame: 0 };
+        let sliderDragging = false;
+        const videoFeed = document.getElementById('videoFeed');
+        const timelineSlider = document.getElementById('timelineSlider');
+        const videoTimeline = document.getElementById('videoTimeline');
+        
+        // Timeline slider event listeners
+        timelineSlider.addEventListener('mousedown', () => { sliderDragging = true; });
+        timelineSlider.addEventListener('mouseup', () => { sliderDragging = false; seekToPosition(); });
+        timelineSlider.addEventListener('touchstart', () => { sliderDragging = true; });
+        timelineSlider.addEventListener('touchend', () => { sliderDragging = false; seekToPosition(); });
+        timelineSlider.addEventListener('change', seekToPosition);
+        
+        // Format seconds to mm:ss
+        function formatTime(seconds) {
+            const mins = Math.floor(seconds / 60);
+            const secs = Math.floor(seconds % 60);
+            return `${mins}:${secs.toString().padStart(2, '0')}`;
+        }
+        
+        // Update timeline display
+        function updateTimeline() {
+            if (!isRunning || videoSource !== 'file') return;
+            
+            fetch('/get_video_info')
+                .then(response => response.json())
+                .then(data => {
+                    videoInfo = data;
+                    
+                    if (data.is_video_file && data.total_frames > 0) {
+                        videoTimeline.classList.add('active');
+                        
+                        // Update time displays
+                        const currentSeconds = data.current_frame / data.fps;
+                        document.getElementById('currentTime').textContent = formatTime(currentSeconds);
+                        document.getElementById('totalTime').textContent = formatTime(data.duration);
+                        
+                        // Update slider position (only if not being dragged)
+                        if (!sliderDragging) {
+                            const progress = (data.current_frame / data.total_frames) * 100;
+                            timelineSlider.value = progress;
+                        }
+                    } else {
+                        videoTimeline.classList.remove('active');
+                    }
+                })
+                .catch(err => console.error('Error getting video info:', err));
+        }
+        
+        // Seek to slider position
+        async function seekToPosition() {
+            const position = parseFloat(timelineSlider.value);
+            
+            try {
+                await fetch('/seek_video', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ position: position })
+                });
+            } catch (error) {
+                console.error('Error seeking:', error);
+            }
+        }
+        
+        // Skip frames forward or backward
+        async function skipFrames(frames) {
+            const targetFrame = videoInfo.current_frame + frames;
+            
+            try {
+                await fetch('/seek_video', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ frame: targetFrame })
+                });
+            } catch (error) {
+                console.error('Error skipping frames:', error);
+            }
+        }
+        
+        // Toggle play/pause
+        async function togglePlayPause() {
+            try {
+                const response = await fetch('/toggle_pause', { method: 'POST' });
+                const data = await response.json();
+                isPaused = data.paused;
+                
+                const btn = document.getElementById('playPauseBtn');
+                if (isPaused) {
+                    btn.textContent = '▶ Play';
+                    btn.classList.remove('active');
+                } else {
+                    btn.textContent = '⏸ Pause';
+                    btn.classList.add('active');
+                }
+            } catch (error) {
+                console.error('Error toggling pause:', error);
+            }
+        }
+        
+        // Select webcam as source
+        async function selectWebcam() {
+            videoSource = 'webcam';
+            document.getElementById('webcamBtn').classList.add('active');
+            document.getElementById('uploadStatus').textContent = 'Source: Webcam';
+            videoTimeline.classList.remove('active');
+            
+            await fetch('/use_webcam', { method: 'POST' });
+        }
+        
+        // Upload video file
+        async function uploadVideo(input) {
+            if (!input.files || !input.files[0]) return;
+            
+            const file = input.files[0];
+            const formData = new FormData();
+            formData.append('video', file);
+            
+            document.getElementById('uploadStatus').textContent = 'Uploading...';
+            
+            try {
+                const response = await fetch('/upload_video', {
+                    method: 'POST',
+                    body: formData
+                });
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    videoSource = 'file';
+                    document.getElementById('webcamBtn').classList.remove('active');
+                    document.getElementById('uploadStatus').textContent = `Source: ${data.filename}`;
+                    // Reset pause state for new video
+                    isPaused = false;
+                    document.getElementById('playPauseBtn').textContent = '⏸ Pause';
+                    document.getElementById('playPauseBtn').classList.add('active');
+                } else {
+                    document.getElementById('uploadStatus').textContent = 'Upload failed';
+                }
+            } catch (error) {
+                console.error('Error uploading video:', error);
+                document.getElementById('uploadStatus').textContent = 'Upload error';
+            }
+        }
+        
+        // Start analysis
+        async function startAnalysis() {
+            const height = document.getElementById('shooterHeight').value;
+            
+            try {
+                const response = await fetch('/start_analysis', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ height: height || 180, source: videoSource })
+                });
+                
+                if (response.ok) {
+                    isRunning = true;
+                    videoFeed.src = '/video_feed';
+                    document.getElementById('startBtn').disabled = true;
+                    document.getElementById('stopBtn').disabled = false;
+                    document.getElementById('hoopBtn').disabled = false;
+                    document.getElementById('floorBtn').disabled = false;
+                    document.getElementById('statusOverlay').textContent = '🔴 LIVE';
+                    document.getElementById('statusOverlay').classList.add('live');
+                    
+                    // Start stats update
+                    updateStats();
+                }
+            } catch (error) {
+                console.error('Error starting analysis:', error);
+            }
+        }
+        
+        // Stop analysis
+        async function stopAnalysis() {
+            try {
+                await fetch('/stop_analysis', { method: 'POST' });
+                isRunning = false;
+                videoFeed.src = '';
+                document.getElementById('startBtn').disabled = false;
+                document.getElementById('stopBtn').disabled = true;
+                document.getElementById('hoopBtn').disabled = true;
+                document.getElementById('floorBtn').disabled = true;
+                document.getElementById('statusOverlay').textContent = '⏸ Stopped';
+                document.getElementById('statusOverlay').classList.remove('live');
+            } catch (error) {
+                console.error('Error stopping analysis:', error);
+            }
+        }
+        
+        // Update stats from server
+        async function updateStats() {
+            if (!isRunning) return;
+            
+            try {
+                const response = await fetch('/get_stats');
+                const stats = await response.json();
+                
+                document.getElementById('shotCount').textContent = stats.shots;
+                
+                const stageEl = document.getElementById('stage');
+                stageEl.textContent = stats.stage;
+                stageEl.className = 'stat-value';
+                if (stats.stage === 'set') stageEl.classList.add('stage-set');
+                if (stats.stage === 'release') stageEl.classList.add('stage-release');
+                
+                document.getElementById('elbowAngle').textContent = stats.elbow_angle + '°';
+                document.getElementById('kneeAngle').textContent = stats.knee_angle + '°';
+                document.getElementById('jumpHeight').textContent = stats.jump_height + ' cm';
+                
+                const formScoreEl = document.getElementById('formScore');
+                formScoreEl.textContent = stats.form_score;
+                formScoreEl.className = 'score';
+                if (stats.form_score >= 70) formScoreEl.classList.add('good');
+                else if (stats.form_score >= 50) formScoreEl.classList.add('medium');
+                else if (stats.form_score > 0) formScoreEl.classList.add('poor');
+                
+                // Update feedback
+                const feedbackList = document.getElementById('feedbackList');
+                if (stats.feedback && stats.feedback.length > 0) {
+                    feedbackList.innerHTML = stats.feedback.map(f => 
+                        `<div class="feedback-item ${f.includes('Good') ? 'good' : ''}">${f}</div>`
+                    ).join('');
+                } else {
+                    feedbackList.innerHTML = '<div class="feedback-item">Analyzing your form...</div>';
+                }
+                
+                // Update shot history
+                updateShotHistory();
+                
+                // Update video timeline
+                updateTimeline();
+                
+            } catch (error) {
+                console.error('Error updating stats:', error);
+            }
+            
+            setTimeout(updateStats, 100);
+        }
+        
+        // Update shot history
+        async function updateShotHistory() {
+            try {
+                const response = await fetch('/get_shot_data');
+                const shots = await response.json();
+                
+                const historyEl = document.getElementById('shotHistory');
+                if (shots.length === 0) {
+                    historyEl.innerHTML = '<p style="color: #bdc3c7; text-align: center;">No shots recorded yet</p>';
+                } else {
+                    historyEl.innerHTML = shots.slice(-5).reverse().map(shot => `
+                        <div class="shot-row">
+                            <span class="shot-num">${shot.shot_id}</span>
+                            <span>Form: ${shot.form_score}/100</span>
+                            <span>Jump: ${shot.jump_height_cm}cm</span>
+                        </div>
+                    `).join('');
+                }
+            } catch (error) {
+                console.error('Error updating shot history:', error);
+            }
+        }
+        
+        // Set hoop mode
+        function setHoopMode() {
+            annotationMode = 'hoop';
+            document.getElementById('annotationMode').classList.add('active');
+            document.getElementById('annotationTitle').textContent = '🎯 Select Hoop Area';
+            document.getElementById('annotationInstructions').textContent = 
+                'Click and drag on the video to draw a box around the basketball hoop (rim and net).';
+            videoFeed.style.cursor = 'crosshair';
+        }
+        
+        // Set floor mode
+        function setFloorMode() {
+            annotationMode = 'floor';
+            document.getElementById('annotationMode').classList.add('active');
+            document.getElementById('annotationTitle').textContent = '📏 Set Floor Level';
+            document.getElementById('annotationInstructions').textContent = 
+                'Click on the video at the floor level where the player stands.';
+            videoFeed.style.cursor = 'crosshair';
+        }
+        
+        // Mouse events for annotation
+        videoFeed.addEventListener('mousedown', function(e) {
+            if (!annotationMode) return;
+            
+            const rect = videoFeed.getBoundingClientRect();
+            const scaleX = videoFeed.naturalWidth / rect.width;
+            const scaleY = videoFeed.naturalHeight / rect.height;
+            
+            startX = (e.clientX - rect.left) * scaleX;
+            startY = (e.clientY - rect.top) * scaleY;
+            
+            if (annotationMode === 'floor') {
+                // Set floor immediately on click
+                setFloor(startY);
+            }
+        });
+        
+        videoFeed.addEventListener('mouseup', async function(e) {
+            if (annotationMode !== 'hoop') return;
+            
+            const rect = videoFeed.getBoundingClientRect();
+            const scaleX = videoFeed.naturalWidth / rect.width;
+            const scaleY = videoFeed.naturalHeight / rect.height;
+            
+            const endX = (e.clientX - rect.left) * scaleX;
+            const endY = (e.clientY - rect.top) * scaleY;
+            
+            const x = Math.min(startX, endX);
+            const y = Math.min(startY, endY);
+            const width = Math.abs(endX - startX);
+            const height = Math.abs(endY - startY);
+            
+            if (width > 10 && height > 10) {
+                await fetch('/set_hoop', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ x, y, width, height })
+                });
+            }
+            
+            annotationMode = null;
+            document.getElementById('annotationMode').classList.remove('active');
+            videoFeed.style.cursor = 'default';
+        });
+        
+        async function setFloor(y) {
+            await fetch('/set_floor', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ y })
+            });
+            
+            annotationMode = null;
+            document.getElementById('annotationMode').classList.remove('active');
+            videoFeed.style.cursor = 'default';
+        }
+        
+        // Reset analysis
+        async function resetAnalysis() {
+            try {
+                await fetch('/reset', { method: 'POST' });
+                document.getElementById('shotCount').textContent = '0';
+                document.getElementById('stage').textContent = 'Ready';
+                document.getElementById('formScore').textContent = '0';
+                document.getElementById('shotHistory').innerHTML = 
+                    '<p style="color: #bdc3c7; text-align: center;">No shots recorded yet</p>';
+            } catch (error) {
+                console.error('Error resetting:', error);
+            }
+        }
+        
+        // Download CSV
+        function downloadData() {
+            window.location.href = '/download_csv';
+        }
+    </script>
+</body>
+</html>

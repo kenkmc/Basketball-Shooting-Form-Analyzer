@@ -1,26 +1,31 @@
-# Basketball Shooting Form Analyzer
+# Basketball Shooting Form Analyzer (Web App)
 
-This program uses computer vision (MediaPipe and OpenCV) to analyze a basketball player's shooting form in real-time. It includes a GUI for easy setup, data recording, and advanced environment analysis.
+This application uses computer vision (MediaPipe and OpenCV) to analyze a basketball player's shooting form in real-time or from uploaded videos. It features a modern web interface for easy interaction, data visualization, and video playback control.
 
 ## Features
 
-- **Graphical User Interface (GUI)**: Easy-to-use window to select video source and enter shooter details.
-- **Real-time Pose Detection**: Detects body landmarks (shoulder, elbow, wrist, hip, knee, ankle).
-- **Shot Analysis**:
-  - **Angle Calculation**: Tracks elbow and knee angles during the shot.
-  - **Shot Detection**: Automatically counts shots based on 'Set' and 'Release' phases.
-  - **Jump Height Estimation**: Calculates vertical jump height (requires shooter height input).
-- **Environment Annotation**:
-  - **Hoop Detection**: Manually select the hoop location.
-  - **Floor Level**: Manually set the floor level for reference.
-  - **Ball Tracking**: Automatic color-based detection of the basketball.
-- **Data Recording**: Saves detailed statistics for every shot to shooting_data.csv.
-- **Video Export**: Option to save the analyzed video with all overlays.
+- **Web Interface**: Clean, responsive dashboard accessible via browser.
+- **Dual Modes**:
+  - **Webcam Mode**: Real-time analysis using your computer's camera.
+  - **Video Upload Mode**: Upload and analyze pre-recorded video files.
+- **Video Playback Control**:
+  - **Timeline Slider**: Seek to any part of the video.
+  - **Frame Stepping**: Move frame-by-frame for precise analysis.
+  - **Slow Motion/Pause**: Control playback flow.
+- **Advanced Analysis**:
+  - **Pose Detection**: Tracks key body landmarks (shoulder, elbow, wrist, hip, knee, ankle).
+  - **Form Scoring**: Calculates a form score based on shooting mechanics.
+  - **Shot Detection**: Automatically counts shots and identifies 'Set' and 'Release' phases.
+  - **Jump Height**: Estimates vertical jump height (optional shooter height input).
+- **Environment Tools**:
+  - **Hoop Selection**: Interactive tool to mark the hoop location.
+  - **Floor Level**: Interactive tool to set the floor level.
+- **Data Export**: Download detailed shot statistics as CSV.
 
 ## Requirements
 
-- Python 3.x
-- Webcam (or a video file)
+- Python 3.8+
+- Webcam (for live analysis)
 
 ## Installation
 
@@ -31,26 +36,32 @@ This program uses computer vision (MediaPipe and OpenCV) to analyze a basketball
 
 ## Usage
 
-1. Run the script:
+1. Run the Flask application:
    ```bash
-   python shooting_analysis.py
+   python app.py
    ``` 
-2. **GUI Setup**:
-   - Enter the **Shooter's Height** (in cm).
-   - Select **Video Source** (Webcam or Video File).
-   - Check **Save Analyzed Video** if you want to export the result.
-   - Click **START ANALYSIS**.
+2. Open your web browser and navigate to:
+   ```
+   http://localhost:5000
+   ```
 
-3. **Environment Setup** (First Frame):
-   - **Select Hoop**: Draw a box around the hoop and press ENTER.
-   - **Select Floor**: Click on the floor level line and press any key to confirm.
+3. **Setup**:
+   - **Video Source**: Choose "Use Webcam" or "Upload Video File".
+   - **Shooter Height** (Optional): Enter height in cm for accurate jump height measurement.
 
 4. **Analysis**:
-   - Perform shooting motions.
-   - The program will track your form, count shots, and estimate jump height.
-   - Press q to stop and save data.
+   - Click **Start Analysis**.
+   - **Set Hoop/Floor**: Use the buttons to mark the hoop and floor on the video feed for better context.
+   - Perform shooting motions. The app will track your form and update stats in real-time.
 
-## Output
+5. **Review**:
+   - Use the **Video Timeline** to review specific shots (Video File mode).
+   - Check the **Live Statistics** and **Shot History** panels.
+   - Click **Download CSV** to save your session data.
 
-- **shooting_data.csv**: Contains timestamp, shot ID, elbow/knee angles, and jump height for each shot.
-- **Saved Video**: (Optional) An .mp4 file with all visual annotations.
+## Camera Placement
+
+For best results:
+- Place camera to the **SIDE** of the player (perpendicular to shooting direction).
+- Camera should be at waist height (1-1.2m).
+- Ensure the camera sees the player's full body and the hoop.
